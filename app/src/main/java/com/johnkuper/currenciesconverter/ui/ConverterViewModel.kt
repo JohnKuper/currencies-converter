@@ -2,7 +2,7 @@ package com.johnkuper.currenciesconverter.ui
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.johnkuper.currenciesconverter.network.CurrenciesApi
+import com.johnkuper.currenciesconverter.api.CurrenciesApi
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 

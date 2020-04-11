@@ -1,4 +1,4 @@
-package com.johnkuper.currenciesconverter.network
+package com.johnkuper.currenciesconverter.api
 
 import com.google.gson.annotations.SerializedName
 

@@ -1,4 +1,4 @@
-package com.johnkuper.currenciesconverter.network
+package com.johnkuper.currenciesconverter.api
 
 import io.reactivex.Observable
 import retrofit2.http.GET
