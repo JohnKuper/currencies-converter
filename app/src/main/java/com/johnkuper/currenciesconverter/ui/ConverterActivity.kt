@@ -2,6 +2,7 @@ package com.johnkuper.currenciesconverter.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.johnkuper.currenciesconverter.ConverterApplication
 import com.johnkuper.currenciesconverter.R
 import com.johnkuper.currenciesconverter.di.ViewModelFactory
@@ -12,13 +13,16 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
 
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    lateinit var converterViewModel: ConverterViewModel
+    private lateinit var converterViewModel: ConverterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConverterApplication.appComponent.inject(this)
         converterViewModel = createViewModel(viewModelFactory) {
-            getCurrenciesRates()
+            currenciesLiveData.observe(this@ConverterActivity, Observer {
+                kuperLog(it.toString())
+            })
+            startCurrenciesRatesPolling()
         }
     }
 }

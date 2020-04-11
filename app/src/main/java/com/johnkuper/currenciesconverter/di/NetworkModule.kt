@@ -1,6 +1,7 @@
 package com.johnkuper.currenciesconverter.di
 
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
+import com.johnkuper.currenciesconverter.network.GetCurrenciesRatesUseCase
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -34,6 +35,9 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideCurrenciesApi(retrofit: Retrofit): CurrenciesApi = retrofit.create(
-        CurrenciesApi::class.java)
+    fun provideCurrenciesApi(retrofit: Retrofit): CurrenciesApi = retrofit.create(CurrenciesApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGetRatesUseCase(currenciesApi: CurrenciesApi) = GetCurrenciesRatesUseCase(currenciesApi)
 }
