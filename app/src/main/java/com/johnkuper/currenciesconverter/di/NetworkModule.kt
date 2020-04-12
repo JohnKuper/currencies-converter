@@ -1,7 +1,12 @@
 package com.johnkuper.currenciesconverter.di
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
-import com.johnkuper.currenciesconverter.network.GetCurrenciesRatesUseCase
+import com.johnkuper.currenciesconverter.api.CurrenciesRates
+import com.johnkuper.currenciesconverter.api.CurrenciesRatesDeserializer
+import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -24,11 +29,19 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit {
+    fun provideGson(): Gson {
+        return GsonBuilder()
+            .registerTypeAdapter(object : TypeToken<CurrenciesRates>() {}.type, CurrenciesRatesDeserializer())
+            .create()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(client: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://hiring.revolut.codes/")
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
     }
@@ -39,5 +52,5 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideGetRatesUseCase(currenciesApi: CurrenciesApi) = GetCurrenciesRatesUseCase(currenciesApi)
+    fun provideGetRatesUseCase(currenciesApi: CurrenciesApi) = GetRatesUseCase(currenciesApi)
 }
