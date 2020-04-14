@@ -1,11 +1,6 @@
 package com.johnkuper.currenciesconverter.di
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
-import com.johnkuper.currenciesconverter.api.CurrenciesRates
-import com.johnkuper.currenciesconverter.api.CurrenciesRatesDeserializer
 import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import dagger.Module
 import dagger.Provides
@@ -29,19 +24,11 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideGson(): Gson {
-        return GsonBuilder()
-            .registerTypeAdapter(object : TypeToken<CurrenciesRates>() {}.type, CurrenciesRatesDeserializer())
-            .create()
-    }
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(client: OkHttpClient, gson: Gson): Retrofit {
+    fun provideRetrofit(client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://hiring.revolut.codes/")
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
     }

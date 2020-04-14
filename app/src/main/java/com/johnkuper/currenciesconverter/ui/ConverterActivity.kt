@@ -13,7 +13,6 @@ import com.johnkuper.currenciesconverter.R
 import com.johnkuper.currenciesconverter.di.ViewModelFactory
 import com.johnkuper.currenciesconverter.domain.ConverterItem
 import com.johnkuper.currenciesconverter.extensions.createViewModel
-import com.johnkuper.currenciesconverter.extensions.onAnimationsFinished
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.converter_list_item.view.*
 import javax.inject.Inject
@@ -31,11 +30,12 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
         ConverterApplication.appComponent.inject(this)
 
         converter_list.adapter = ConverterAdapter(this) {
-            converterViewModel.onPrimaryItemChanged(it)
+            converterViewModel.onItemsChanged(it)
         }.also { converterAdapter = it }
+        converter_list.setHasFixedSize(true)
 
         converterViewModel = createViewModel(viewModelFactory) {
-            converterItems.observe(this@ConverterActivity, Observer {
+            converterItemsLiveData.observe(this@ConverterActivity, Observer {
                 converterAdapter.setData(it)
             })
             startRatesPolling()
@@ -45,7 +45,7 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
 
 class ConverterAdapter(
     context: Context,
-    private val onTopItemChanged: (ConverterItem) -> Unit
+    private val onItemsChanged: (List<ConverterItem>) -> Unit
 ) : RecyclerView.Adapter<ConverterAdapter.ConverterViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
@@ -63,37 +63,27 @@ class ConverterAdapter(
         }
     }
 
-    private fun moveItemOnTop(fromPosition: Int) {
-        val newTop = items[fromPosition]
-        items.removeAt(fromPosition)
-        items.add(0, newTop)
-        notifyItemMoved(fromPosition, 0)
-        recyclerView.scrollToPosition(0)
-        recyclerView.onAnimationsFinished { onTopItemChanged(newTop) }
-    }
-
-    override fun getItemCount() = items.size
-
     override fun onBindViewHolder(holder: ConverterViewHolder, position: Int) {
         holder.bind(items[position])
     }
 
-//    override fun getItemId(position: Int): Long {
-//        return items[position].code.hashCode().toLong()
-//    }
+    override fun getItemCount() = items.size
 
-    // TODO Kuper optimize data updating
-    fun setData(rates: List<ConverterItem>) {
-        if (items.isEmpty()) {
-            items.addAll(rates)
-        } else {
-            val newItems = items.map { converterItem ->
-                rates.first { it.code == converterItem.code }
-            }
+    private fun moveItemOnTop(fromPosition: Int) {
+        val newTop = items[fromPosition]
+        items.removeAt(fromPosition)
+        items.add(0, newTop)
+        onItemsChanged(items)
+        notifyItemMoved(fromPosition, 0)
+        recyclerView.scrollToPosition(0)
+    }
+
+    fun setData(newItems: List<ConverterItem>) {
+        if (!recyclerView.isAnimating) {
             items.clear()
             items.addAll(newItems)
+            notifyDataSetChanged()
         }
-        notifyDataSetChanged()
     }
 
     inner class ConverterViewHolder(view: View, onViewClicked: (Int) -> Unit) : RecyclerView.ViewHolder(view) {
@@ -110,4 +100,22 @@ class ConverterAdapter(
         }
     }
 }
+
+//class ConverterDiffUtil(
+//    private val oldList: List<ConverterItem>,
+//    private val newList: List<ConverterItem>
+//) : DiffUtil.Callback() {
+//
+//    override fun getOldListSize() = oldList.size
+//
+//    override fun getNewListSize() = newList.size
+//
+//    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+//        return oldList[oldItemPosition].code == newList[newItemPosition].code
+//    }
+//
+//    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+//        return oldList[oldItemPosition] == newList[newItemPosition]
+//    }
+//}
 

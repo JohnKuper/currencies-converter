@@ -16,5 +16,5 @@ abstract class UseCase<in P, R> {
             .subscribe()
     }
 
-    abstract fun execute(parameters: P): Observable<R>
+    abstract fun execute(params: P): Observable<R>
 }
