@@ -1,37 +1,38 @@
 package com.johnkuper.currenciesconverter.network
 
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
-import com.johnkuper.currenciesconverter.domain.ConverterItem
 import io.reactivex.Observable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class GetRatesUseCase @Inject constructor(
     private val currenciesApi: CurrenciesApi
-) : UseCase<GetRatesParameters, List<ConverterItem>>() {
+) : UseCase<GetRatesParams, LinkedHashMap<String, Double>>() {
 
-    // TODO Kuper after receiving an error stop immediately
-    override fun execute(params: GetRatesParameters): Observable<List<ConverterItem>> {
-        return currenciesApi
-            .getRates(params.baseCurrency)
-            .map { response ->
-                // TODO could be optimized?
-                if (params.converterItems.isEmpty()) {
-                    response.rates.mapTo(mutableListOf(ConverterItem(params.baseCurrency, params.amount))) { rate ->
-                        ConverterItem(rate.key, rate.value * params.amount)
-                    }
-                } else {
-                    params.converterItems.map { item ->
-                        response.rates[item.code]?.let { item.copy(amount = it * params.amount) } ?: item
-                    }
-                }
+    // TODO Kuper handle errors and stop after a several attempts
+    override fun execute(params: GetRatesParams): Observable<LinkedHashMap<String, Double>> {
+        var observable = currenciesApi.getRates(params.baseCurrency).map {
+            linkedMapOf(it.baseCurrency to 1.0).apply { putAll(it.rates) }
+        }.repeatWhen { it.delay(1000, TimeUnit.MILLISECONDS) }
+
+        if (params.isCurrencyChanged && params.lastRates.isNotEmpty()) {
+            observable = observable.startWith(recalculatedRates(params))
+        }
+        return observable
+    }
+
+    private fun recalculatedRates(params: GetRatesParams): LinkedHashMap<String, Double> {
+        return params.run {
+            val baseCurrencyOldRate = requireNotNull(lastRates.remove(baseCurrency))
+            linkedMapOf(baseCurrency to 1.0).apply {
+                putAll(lastRates.mapValues { it.value / baseCurrencyOldRate })
             }
-            .repeatWhen { it.delay(1000, TimeUnit.MILLISECONDS) }
+        }
     }
 }
 
-class GetRatesParameters(
+class GetRatesParams(
     val baseCurrency: String,
-    val amount: Double,
-    val converterItems: List<ConverterItem>
+    val isCurrencyChanged: Boolean,
+    val lastRates: LinkedHashMap<String, Double>
 )

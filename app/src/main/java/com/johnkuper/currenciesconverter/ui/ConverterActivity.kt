@@ -2,10 +2,12 @@ package com.johnkuper.currenciesconverter.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.johnkuper.currenciesconverter.ConverterApplication
@@ -13,8 +15,13 @@ import com.johnkuper.currenciesconverter.R
 import com.johnkuper.currenciesconverter.di.ViewModelFactory
 import com.johnkuper.currenciesconverter.domain.ConverterItem
 import com.johnkuper.currenciesconverter.extensions.createViewModel
+import com.johnkuper.currenciesconverter.extensions.hideKeyboard
+import com.johnkuper.currenciesconverter.extensions.onAnimationsFinished
+import com.johnkuper.currenciesconverter.extensions.showKeyboard
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.converter_list_item.view.*
+import java.lang.Double.parseDouble
+import java.util.*
 import javax.inject.Inject
 
 class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
@@ -29,23 +36,33 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
         super.onCreate(savedInstanceState)
         ConverterApplication.appComponent.inject(this)
 
-        converter_list.adapter = ConverterAdapter(this) {
-            converterViewModel.onItemsChanged(it)
-        }.also { converterAdapter = it }
-        converter_list.setHasFixedSize(true)
-
         converterViewModel = createViewModel(viewModelFactory) {
             converterItemsLiveData.observe(this@ConverterActivity, Observer {
                 converterAdapter.setData(it)
             })
-            startRatesPolling()
         }
+
+        converter_list.adapter = ConverterAdapter(this, converterViewModel).apply {
+            setHasStableIds(true)
+            converterAdapter = this
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        converterViewModel.startRatesUpdates()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        converterViewModel.stopRatesUpdates()
     }
 }
 
 class ConverterAdapter(
     context: Context,
-    private val onItemsChanged: (List<ConverterItem>) -> Unit
+    // TODO Kuper is it good to pass it here?
+    private val converterViewModel: ConverterViewModel
 ) : RecyclerView.Adapter<ConverterAdapter.ConverterViewHolder>() {
 
     private lateinit var recyclerView: RecyclerView
@@ -58,64 +75,82 @@ class ConverterAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConverterViewHolder {
-        return ConverterViewHolder(inflater.inflate(R.layout.converter_list_item, parent, false)) {
-            moveItemOnTop(it)
-        }
+        return ConverterViewHolder(inflater.inflate(R.layout.converter_list_item, parent, false))
     }
 
     override fun onBindViewHolder(holder: ConverterViewHolder, position: Int) {
-        holder.bind(items[position])
+//        kuperLog("onBindViewHolder(), position = $position")
+        holder.bind(items[position], position)
     }
 
     override fun getItemCount() = items.size
 
+    override fun getItemId(position: Int): Long {
+        return items[position].code.hashCode().toLong()
+    }
+
     private fun moveItemOnTop(fromPosition: Int) {
-        val newTop = items[fromPosition]
-        items.removeAt(fromPosition)
-        items.add(0, newTop)
-        onItemsChanged(items)
-        notifyItemMoved(fromPosition, 0)
-        recyclerView.scrollToPosition(0)
+        if (fromPosition > 0) {
+            val newTop = items[fromPosition]
+            items.removeAt(fromPosition)
+            items.add(0, newTop)
+            notifyItemMoved(fromPosition, 0)
+            recyclerView.scrollToPosition(0)
+            converterViewModel.onItemsChanged(items)
+        }
     }
 
     fun setData(newItems: List<ConverterItem>) {
-        if (!recyclerView.isAnimating) {
-            items.clear()
-            items.addAll(newItems)
+        items.clear()
+        items.addAll(newItems)
+        recyclerView.onAnimationsFinished {
             notifyDataSetChanged()
         }
     }
 
-    inner class ConverterViewHolder(view: View, onViewClicked: (Int) -> Unit) : RecyclerView.ViewHolder(view) {
+    // TODO Kuper enter should remove focus and close the keyboard
+    inner class ConverterViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        private val currencyAmount = view.currency_amount
+        private val currencyCode = view.currency_code
+
+        private var amountTextWatcher: TextWatcher? = null
 
         init {
+            currencyAmount.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus) {
+                    kuperLog("onFocusChange(), hasFocus=$hasFocus, amount=${currencyAmount.text}, adapterPosition=$adapterPosition")
+                    currencyAmount.setSelection(currencyAmount.length())
+                    amountTextWatcher = currencyAmount.doOnTextChanged { text, _, _, _ ->
+                        kuperLog("doOnTextChanged(), text=$text")
+                        // TODO Kuper parse double with comma
+                        if (text.isNullOrEmpty()) {
+                            converterViewModel.onAmountChanged(0.0)
+                        } else {
+                            converterViewModel.onAmountChanged(parseDouble(text.toString()))
+                        }
+                    }
+                } else {
+                    kuperLog("onFocusChange(), hasFocus=$hasFocus, amount=${currencyAmount.text}, adapterPosition=$adapterPosition")
+                    currencyAmount.removeTextChangedListener(amountTextWatcher)
+                    if (adapterPosition == 0) {
+                        currencyAmount.hideKeyboard()
+                    }
+                }
+            }
             view.setOnClickListener {
-                onViewClicked(layoutPosition)
+                moveItemOnTop(layoutPosition)
+                currencyAmount.requestFocus()
+                currencyAmount.showKeyboard()
             }
         }
 
-        fun bind(item: ConverterItem) {
-            itemView.currency_code.text = item.code
-            itemView.currency_amount.setText(String.format("%.2f", item.amount))
+        fun bind(item: ConverterItem, position: Int) {
+//            kuperLog("bind(), position = $position")
+            if (!currencyAmount.isFocused) {
+                currencyCode.text = item.code
+                currencyAmount.setText(String.format(Locale.US, "%.2f", item.amount))
+            }
         }
     }
 }
-
-//class ConverterDiffUtil(
-//    private val oldList: List<ConverterItem>,
-//    private val newList: List<ConverterItem>
-//) : DiffUtil.Callback() {
-//
-//    override fun getOldListSize() = oldList.size
-//
-//    override fun getNewListSize() = newList.size
-//
-//    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-//        return oldList[oldItemPosition].code == newList[newItemPosition].code
-//    }
-//
-//    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-//        return oldList[oldItemPosition] == newList[newItemPosition]
-//    }
-//}
-

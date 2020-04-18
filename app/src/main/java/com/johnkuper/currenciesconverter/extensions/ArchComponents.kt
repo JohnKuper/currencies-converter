@@ -1,10 +1,7 @@
 package com.johnkuper.currenciesconverter.extensions
 
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 
 inline fun <reified T : ViewModel> FragmentActivity.createViewModel(
     factory: ViewModelProvider.Factory, body: T.() -> Unit
@@ -12,4 +9,8 @@ inline fun <reified T : ViewModel> FragmentActivity.createViewModel(
 
 fun <X, Y> LiveData<X>.map(body: (X) -> Y): LiveData<Y> {
     return Transformations.map(this, body)
+}
+
+fun <T> MutableLiveData<T>.repeat() {
+    value = value
 }
