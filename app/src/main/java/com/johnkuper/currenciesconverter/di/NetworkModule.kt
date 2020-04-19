@@ -1,11 +1,13 @@
 package com.johnkuper.currenciesconverter.di
 
+import com.johnkuper.currenciesconverter.BuildConfig
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
 import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.logging.HttpLoggingInterceptor.Level.BODY
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -17,9 +19,11 @@ class NetworkModule {
     @Provides
     @Singleton
     fun providerOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-            .build()
+        val builder = OkHttpClient.Builder()
+        if (BuildConfig.DEBUG) {
+            builder.addInterceptor(HttpLoggingInterceptor().setLevel(BODY))
+        }
+        return builder.build()
     }
 
     @Provides

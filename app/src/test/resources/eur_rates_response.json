@@ -1,0 +1,10 @@
+{
+  "baseCurrency": "EUR",
+  "rates": {
+    "AUD": 1.598,
+    "BGN": 1.991,
+    "BRL": 4.248,
+    "CAD": 1.524,
+    "CHF": 1.152
+  }
+}

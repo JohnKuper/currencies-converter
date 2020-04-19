@@ -50,12 +50,12 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onResume() {
         super.onResume()
-        converterViewModel.startRatesUpdates()
+        converterViewModel.startRatesPolling()
     }
 
     override fun onPause() {
         super.onPause()
-        converterViewModel.stopRatesUpdates()
+        converterViewModel.stopRatesPolling()
     }
 }
 

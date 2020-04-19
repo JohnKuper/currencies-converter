@@ -17,6 +17,9 @@ fun kuperLog(message: String) {
     Log.d("JohnKuper", message)
 }
 
+const val DEFAULT_AMOUNT = 100.0
+const val DEFAULT_BASE_CURRENCY = "EUR"
+
 class ConverterViewModel @Inject constructor(
     private val getRatesUseCase: GetRatesUseCase
 ) : ViewModel() {
@@ -24,31 +27,32 @@ class ConverterViewModel @Inject constructor(
     private val _currenciesRates = MutableLiveData<ResponseResult<LinkedHashMap<String, Double>>>()
     val converterItemsLiveData: LiveData<List<ConverterItem>>
 
-    private var baseCurrency: String = "EUR"
-    private var converterAmount: Double = 100.0
+    private var baseCurrency: String = DEFAULT_BASE_CURRENCY
+    private var converterAmount: Double = DEFAULT_AMOUNT
     private var converterItems = mutableListOf<ConverterItem>()
-
     private var ratesDisposable: Disposable? = null
 
     init {
         converterItemsLiveData = _currenciesRates.map { result ->
-            val currencyToRate = (result as? ResponseResult.Success)?.data.orEmpty()
-            if (converterItems.isEmpty()) {
-                currencyToRate.mapTo(converterItems) { ConverterItem(it.key, it.value * converterAmount) }
-            } else {
-                converterItems = converterItems.mapNotNull { item ->
-                    currencyToRate[item.code]?.let { item.copy(amount = it * converterAmount) }
-                }.toMutableList()
-            }
-            converterItems
+            toConverterItems((result as? ResponseResult.Success)?.data.orEmpty())
         }
     }
 
     override fun onCleared() {
-        stopRatesUpdates()
+        stopRatesPolling()
     }
 
-    fun startRatesUpdates(isCurrencyChanged: Boolean = false) {
+    private fun toConverterItems(rates: Map<String, Double>): List<ConverterItem> {
+        return if (converterItems.isEmpty()) {
+            rates.map { ConverterItem(it.key, it.value * converterAmount) }
+        } else {
+            converterItems.mapNotNull { item ->
+                rates[item.code]?.let { item.copy(amount = it * converterAmount) }
+            }
+        }.also { converterItems = it.toMutableList() }
+    }
+
+    fun startRatesPolling(isCurrencyChanged: Boolean = false) {
         ratesDisposable?.dispose()
         val params = GetRatesParams(
             baseCurrency,
@@ -58,7 +62,7 @@ class ConverterViewModel @Inject constructor(
         ratesDisposable = getRatesUseCase(params, _currenciesRates)
     }
 
-    fun stopRatesUpdates() {
+    fun stopRatesPolling() {
         ratesDisposable?.dispose()
         ratesDisposable = null
     }
@@ -68,7 +72,7 @@ class ConverterViewModel @Inject constructor(
         converterAmount = items.first().amount
         converterItems.clear()
         converterItems.addAll(items)
-        startRatesUpdates(true)
+        startRatesPolling(true)
     }
 
     fun onAmountChanged(amount: Double) {
