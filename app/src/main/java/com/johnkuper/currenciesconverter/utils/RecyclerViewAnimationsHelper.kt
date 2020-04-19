@@ -1,4 +1,4 @@
-package com.johnkuper.currenciesconverter.extensions
+package com.johnkuper.currenciesconverter.utils
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemAnimator.ItemAnimatorFinishedListener

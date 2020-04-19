@@ -1,4 +1,4 @@
-package com.johnkuper.currenciesconverter.extensions
+package com.johnkuper.currenciesconverter.utils
 
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*

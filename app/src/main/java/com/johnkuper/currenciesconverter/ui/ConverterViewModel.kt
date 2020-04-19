@@ -5,11 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.johnkuper.currenciesconverter.domain.ConverterItem
-import com.johnkuper.currenciesconverter.extensions.map
-import com.johnkuper.currenciesconverter.extensions.repeat
 import com.johnkuper.currenciesconverter.network.GetRatesParams
 import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import com.johnkuper.currenciesconverter.network.ResponseResult
+import com.johnkuper.currenciesconverter.utils.map
+import com.johnkuper.currenciesconverter.utils.repeat
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 

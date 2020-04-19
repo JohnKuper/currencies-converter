@@ -15,10 +15,7 @@ import com.johnkuper.currenciesconverter.ConverterApplication
 import com.johnkuper.currenciesconverter.R
 import com.johnkuper.currenciesconverter.di.ViewModelFactory
 import com.johnkuper.currenciesconverter.domain.ConverterItem
-import com.johnkuper.currenciesconverter.extensions.createViewModel
-import com.johnkuper.currenciesconverter.extensions.hideKeyboard
-import com.johnkuper.currenciesconverter.extensions.onAnimationsFinished
-import com.johnkuper.currenciesconverter.extensions.showKeyboard
+import com.johnkuper.currenciesconverter.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.converter_list_item.view.*
 import java.lang.Double.parseDouble
@@ -128,6 +125,7 @@ class ConverterAdapter(
                 if (hasFocus) {
                     kuperLog("onFocusChange(), hasFocus=$hasFocus, amount=${currencyAmount.text}, adapterPosition=$adapterPosition")
                     currencyAmount.setSelection(currencyAmount.length())
+                    currencyAmount.filters = arrayOf(DecimalInputFilter(10, 2))
                     amountTextWatcher = currencyAmount.doOnTextChanged { text, _, _, _ ->
                         kuperLog("doOnTextChanged(), text=$text")
                         // TODO Kuper parse double with comma
@@ -140,6 +138,7 @@ class ConverterAdapter(
                 } else {
                     kuperLog("onFocusChange(), hasFocus=$hasFocus, amount=${currencyAmount.text}, adapterPosition=$adapterPosition")
                     currencyAmount.removeTextChangedListener(amountTextWatcher)
+                    currencyAmount.filters = arrayOf()
                     if (adapterPosition == 0) {
                         currencyAmount.hideKeyboard()
                     }
