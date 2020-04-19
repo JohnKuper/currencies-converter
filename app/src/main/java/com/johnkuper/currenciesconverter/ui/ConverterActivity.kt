@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
@@ -115,11 +116,19 @@ class ConverterAdapter(
         private var amountTextWatcher: TextWatcher? = null
 
         init {
-            currencyAmount.setOnTouchListener { v, event ->
+            currencyAmount.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_UP) {
                     moveItemOnTop(layoutPosition)
                 }
                 false
+            }
+            currencyAmount.setOnEditorActionListener { v, actionId, event ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    v.clearFocus()
+                    true
+                } else {
+                    false
+                }
             }
             currencyAmount.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) {
