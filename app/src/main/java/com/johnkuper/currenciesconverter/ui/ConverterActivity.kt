@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.TextWatcher
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -117,6 +118,12 @@ class ConverterAdapter(
         private var amountTextWatcher: TextWatcher? = null
 
         init {
+            currencyAmount.setOnTouchListener { v, event ->
+                if (event.action == MotionEvent.ACTION_UP) {
+                    moveItemOnTop(layoutPosition)
+                }
+                false
+            }
             currencyAmount.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) {
                     kuperLog("onFocusChange(), hasFocus=$hasFocus, amount=${currencyAmount.text}, adapterPosition=$adapterPosition")
