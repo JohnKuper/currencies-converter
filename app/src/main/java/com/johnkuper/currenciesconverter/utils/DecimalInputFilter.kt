@@ -6,10 +6,22 @@ import java.util.regex.Pattern
 
 class DecimalInputFilter(beforeZero: Int, afterZero: Int) : InputFilter {
 
-    //TODO Kuper replace . on ,
-    private val pattern: Pattern = Pattern.compile(
-        "(([1-9]{1})([0-9]{0," + (beforeZero - 1) + "})?)?(\\.[0-9]{0," + afterZero + "})?"
-    )
+    private var pattern: Pattern
+    private val separators = "[\\.\\,]"
+
+    init {
+        val patterBefore = "(\\d{1,$beforeZero})"
+        val patterAfter = "(\\d{1,$afterZero})"
+        val numberRegex = StringBuilder()
+            .append("($patterBefore$separators$patterAfter)")
+            .append("|")
+            .append("($patterBefore$separators)")
+            .append("|")
+            .append("($patterBefore)")
+            .toString()
+
+        pattern = Pattern.compile(numberRegex)
+    }
 
     override fun filter(
         source: CharSequence,
@@ -19,11 +31,8 @@ class DecimalInputFilter(beforeZero: Int, afterZero: Int) : InputFilter {
         dstart: Int,
         dend: Int
     ): CharSequence? {
-        val sourceResult = source.subSequence(start, end).toString()
-        val result = StringBuilder(dest)
-            .replace(dstart, dend, sourceResult)
-            .toString()
-
-        return if (!pattern.matcher(result).matches()) "" else null
+        val input = dest.substring(0, dstart) + source.substring(start, end) + dest.substring(dend)
+        val matcher = pattern.matcher(input)
+        return if (!matcher.matches()) "" else null
     }
 }

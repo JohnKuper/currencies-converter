@@ -19,8 +19,6 @@ import com.johnkuper.currenciesconverter.domain.ConverterItem
 import com.johnkuper.currenciesconverter.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.converter_list_item.view.*
-import java.lang.Double.parseDouble
-import java.util.*
 import javax.inject.Inject
 
 class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
@@ -107,7 +105,7 @@ class ConverterAdapter(
         }
     }
 
-    // TODO Kuper enter should remove focus and close the keyboard
+    //TODO Kuper refactor currencyAmount setup
     inner class ConverterViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         private val currencyAmount = view.currency_amount
@@ -137,11 +135,10 @@ class ConverterAdapter(
                     currencyAmount.filters = arrayOf(DecimalInputFilter(10, 2))
                     amountTextWatcher = currencyAmount.doOnTextChanged { text, _, _, _ ->
                         kuperLog("doOnTextChanged(), text=$text")
-                        // TODO Kuper parse double with comma
                         if (text.isNullOrEmpty()) {
                             converterViewModel.onAmountChanged(0.0)
                         } else {
-                            converterViewModel.onAmountChanged(parseDouble(text.toString()))
+                            converterViewModel.onAmountChanged(parseDouble(text))
                         }
                     }
                 } else {
@@ -164,7 +161,7 @@ class ConverterAdapter(
 //            kuperLog("bind(), position = $position")
             if (!currencyAmount.isFocused) {
                 currencyCode.text = item.code
-                currencyAmount.setText(String.format(Locale.US, "%.2f", item.amount))
+                currencyAmount.setText(item.formattedAmount)
             }
         }
     }
