@@ -4,6 +4,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.text.ParseException
 
 val decimalFormat = DecimalFormat("#0.00", DecimalFormatSymbols().apply { decimalSeparator = ',' })
 
@@ -15,7 +16,7 @@ fun Double.round(places: Int): Double {
 fun parseDouble(text: CharSequence): Double {
     return try {
         decimalFormat.parse(text.toString()).toDouble()
-    } catch (e: Exception) {
+    } catch (e: ParseException) {
         0.0
     }
 }

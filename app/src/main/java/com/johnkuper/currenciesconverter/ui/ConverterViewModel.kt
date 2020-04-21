@@ -4,10 +4,9 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.johnkuper.currenciesconverter.domain.ConverterItem
-import com.johnkuper.currenciesconverter.network.GetRatesParams
+import com.johnkuper.currenciesconverter.network.BASE_CURRENCY_RATE
 import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import com.johnkuper.currenciesconverter.network.ResponseResult
-import com.johnkuper.currenciesconverter.utils.repeat
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
@@ -23,21 +22,28 @@ class ConverterViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _currenciesRates = MutableLiveData<ResponseResult<LinkedHashMap<String, Double>>>()
-    val converterItemsLiveData: LiveData<List<ConverterItem>>
+    val converterItemsLiveData = MutableLiveData<List<ConverterItem>>()
 
     private var baseCurrency: String = DEFAULT_BASE_CURRENCY
     private var converterAmount: Double = DEFAULT_AMOUNT
     private var converterItems = mutableListOf<ConverterItem>()
+    lateinit var lastRates: LinkedHashMap<String, Double>
+
     private var ratesDisposable: Disposable? = null
 
-    init {
-        converterItemsLiveData = _currenciesRates.map { result ->
-            toConverterItems((result as? ResponseResult.Success)?.data.orEmpty())
+    private val currenciesRatesObserver: ((ResponseResult<LinkedHashMap<String, Double>>) -> Unit) = { result ->
+        if (result is ResponseResult.Success) {
+            lastRates = result.data
+            converterItemsLiveData.value = toConverterItems(result.data)
         }
     }
 
+    init {
+        _currenciesRates.observeForever(currenciesRatesObserver)
+    }
+
     override fun onCleared() {
-        stopRatesPolling()
+        _currenciesRates.removeObserver(currenciesRatesObserver)
     }
 
     private fun toConverterItems(rates: Map<String, Double>): List<ConverterItem> {
@@ -50,15 +56,17 @@ class ConverterViewModel @Inject constructor(
         }.also { converterItems = it.toMutableList() }
     }
 
-    fun startRatesPolling(isCurrencyChanged: Boolean = false) {
+    private fun getRecalculatedRates(): LinkedHashMap<String, Double> {
+        val baseCurrencyOldRate = requireNotNull(lastRates.remove(baseCurrency))
+        return linkedMapOf(baseCurrency to BASE_CURRENCY_RATE).apply {
+            putAll(lastRates.mapValues { it.value / baseCurrencyOldRate })
+        }
+    }
+
+    fun startRatesPolling() {
         kuperLog("startRatesPolling()")
         ratesDisposable?.dispose()
-        val params = GetRatesParams(
-            baseCurrency,
-            isCurrencyChanged,
-            (_currenciesRates.value as? ResponseResult.Success)?.data ?: linkedMapOf()
-        )
-        ratesDisposable = getRatesUseCase(params, _currenciesRates)
+        ratesDisposable = getRatesUseCase(baseCurrency, _currenciesRates)
     }
 
     fun stopRatesPolling() {
@@ -72,12 +80,13 @@ class ConverterViewModel @Inject constructor(
         converterAmount = items.first().amount
         converterItems.clear()
         converterItems.addAll(items)
-        startRatesPolling(true)
+        _currenciesRates.value = ResponseResult.Success(getRecalculatedRates())
+        startRatesPolling()
     }
 
     fun onAmountChanged(amount: Double) {
         kuperLog("ConverterViewModel.onAmountChanged(), amount=$amount")
         converterAmount = amount
-        _currenciesRates.repeat()
+        converterItemsLiveData.value = toConverterItems(lastRates)
     }
 }

@@ -1,7 +1,9 @@
 package com.johnkuper.currenciesconverter.di
 
+import android.net.ConnectivityManager
 import com.johnkuper.currenciesconverter.BuildConfig
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
+import com.johnkuper.currenciesconverter.network.ConnectivityInterceptor
 import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import dagger.Module
 import dagger.Provides
@@ -18,11 +20,16 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun providerOkHttpClient(): OkHttpClient {
+    fun provideConnectivityInterceptor(cm: ConnectivityManager) = ConnectivityInterceptor(cm)
+
+    @Provides
+    @Singleton
+    fun providerOkHttpClient(connectivityInterceptor: ConnectivityInterceptor): OkHttpClient {
         val builder = OkHttpClient.Builder()
         if (BuildConfig.DEBUG) {
             builder.addInterceptor(HttpLoggingInterceptor().setLevel(BODY))
         }
+        builder.addInterceptor(connectivityInterceptor)
         return builder.build()
     }
 

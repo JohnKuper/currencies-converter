@@ -4,7 +4,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.os.Handler
 import androidx.lifecycle.LiveData
-import com.johnkuper.currenciesconverter.ui.kuperLog
 import com.johnkuper.currenciesconverter.utils.isNetworkConnected
 import javax.inject.Inject
 
@@ -20,7 +19,7 @@ class ConnectivityLiveData @Inject constructor(
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onLost(network: Network) {
-            kuperLog("ConnectivityLiveData.onLost()")
+//            kuperLog("ConnectivityLiveData.onLost()")
             if (isNetworkConnected) {
                 isNetworkConnected = false
                 handler.postDelayed(onLostNetworkRunnable, ON_NETWORK_LOST_DELAY)
@@ -28,7 +27,7 @@ class ConnectivityLiveData @Inject constructor(
         }
 
         override fun onAvailable(network: Network) {
-            kuperLog("ConnectivityLiveData.onAvailable()")
+//            kuperLog("ConnectivityLiveData.onAvailable()")
             handler.removeCallbacks(onLostNetworkRunnable)
             if (!isNetworkConnected) {
                 isNetworkConnected = true
@@ -39,7 +38,7 @@ class ConnectivityLiveData @Inject constructor(
 
     override fun onActive() {
         isNetworkConnected = connectivityManager.isNetworkConnected()
-        kuperLog("ConnectivityLiveData.onActive(), isNetworkConnected=$isNetworkConnected")
+//        kuperLog("ConnectivityLiveData.onActive(), isNetworkConnected=$isNetworkConnected")
         if (!isNetworkConnected) {
             postValue(false)
         }
@@ -47,7 +46,7 @@ class ConnectivityLiveData @Inject constructor(
     }
 
     override fun onInactive() {
-        kuperLog("ConnectivityLiveData.onInactive()")
+//        kuperLog("ConnectivityLiveData.onInactive()")
         connectivityManager.unregisterNetworkCallback(networkCallback)
     }
 }

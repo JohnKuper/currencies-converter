@@ -48,7 +48,7 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onResume() {
         super.onResume()
-        kuperLog("ConverterActivity.onResume()")
+//        kuperLog("ConverterActivity.onResume()")
         converterViewModel.startRatesPolling()
     }
 
@@ -60,6 +60,7 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
     private fun observeViewModel() {
         converterViewModel = createViewModel(viewModelFactory) {
             converterItemsLiveData.observe(this@ConverterActivity, Observer {
+                progress_bar.hide()
                 converterAdapter.setData(it)
             })
         }
@@ -67,13 +68,7 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
 
     private fun observeNetworkState() {
         connectivityLiveData.observe(this, Observer {
-            if (it) {
-                converterViewModel.startRatesPolling()
-                snackbar.dismiss()
-            } else {
-                converterViewModel.stopRatesPolling()
-                snackbar.show()
-            }
+            if (it) snackbar.dismiss() else snackbar.show()
         })
     }
 
@@ -149,7 +144,7 @@ class ConverterAdapter(
                 }
                 false
             }
-            currencyAmount.setOnEditorActionListener { v, actionId, event ->
+            currencyAmount.setOnEditorActionListener { v, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     v.clearFocus()
                     true
@@ -157,7 +152,7 @@ class ConverterAdapter(
                     false
                 }
             }
-            currencyAmount.setOnFocusChangeListener { v, hasFocus ->
+            currencyAmount.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
                     kuperLog("onFocusChange(), hasFocus=$hasFocus, amount=${currencyAmount.text}, adapterPosition=$adapterPosition")
                     currencyAmount.setSelection(currencyAmount.length())
