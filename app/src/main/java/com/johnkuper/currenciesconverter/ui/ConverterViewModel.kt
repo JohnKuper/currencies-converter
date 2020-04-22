@@ -59,7 +59,9 @@ class ConverterViewModel @Inject constructor(
     private fun getRecalculatedRates(): LinkedHashMap<String, Double> {
         val baseCurrencyOldRate = requireNotNull(lastRates.remove(baseCurrency))
         return linkedMapOf(baseCurrency to BASE_CURRENCY_RATE).apply {
-            putAll(lastRates.mapValues { it.value / baseCurrencyOldRate })
+            putAll(lastRates.mapValues { (_, rate) ->
+                baseCurrencyOldRate.takeIf { it > 0.0 }?.let { rate / it } ?: 0.0
+            })
         }
     }
 
