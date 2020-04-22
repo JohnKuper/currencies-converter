@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.johnkuper.currenciesconverter.ConverterApplication
 import com.johnkuper.currenciesconverter.R
@@ -21,6 +22,7 @@ import com.johnkuper.currenciesconverter.network.ConnectivityLiveData
 import com.johnkuper.currenciesconverter.utils.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.converter_list_item.view.*
+import kotlinx.android.synthetic.main.view_toolbar.*
 import javax.inject.Inject
 
 class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
@@ -73,6 +75,7 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun initViews() {
+        toolbar_title.text = getString(R.string.rates_title)
         converter_list.adapter = ConverterAdapter(this, converterViewModel).apply {
             setHasStableIds(true)
             converterAdapter = this
@@ -132,8 +135,10 @@ class ConverterAdapter(
     //TODO Kuper refactor currencyAmount setup
     inner class ConverterViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val currencyAmount = view.currency_amount
+        private val currency_flag = view.currency_flag
         private val currencyCode = view.currency_code
+        private val currencyName = view.currency_name
+        private val currencyAmount = view.currency_amount
 
         private var amountTextWatcher: TextWatcher? = null
 
@@ -187,6 +192,7 @@ class ConverterAdapter(
                 currencyCode.text = item.code
                 currencyAmount.setText(item.formattedAmount)
             }
+            Glide.with(currency_flag).load(R.drawable.flag_us).circleCrop().into(currency_flag)
         }
     }
 }

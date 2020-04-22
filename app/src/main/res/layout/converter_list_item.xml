@@ -5,33 +5,65 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="72dp"
-	android:orientation="vertical">
+	android:background="@android:color/white"
+	android:paddingStart="16dp"
+	android:paddingEnd="16dp">
+
+	<ImageView
+		android:id="@+id/currency_flag"
+		android:layout_width="40dp"
+		android:layout_height="40dp"
+		android:contentDescription="@null"
+		android:src="@drawable/flag_us"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"/>
 
 	<TextView
 		android:id="@+id/currency_code"
+		style="@style/Text.Medium"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="16dp"
-		android:textSize="20sp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
+		android:letterSpacing="-0.02"
+		android:textSize="@dimen/text_body"
+		app:layout_constraintBottom_toTopOf="@id/currency_name"
+		app:layout_constraintStart_toEndOf="@id/currency_flag"
 		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintVertical_chainStyle="packed"
 		tools:text="USD"/>
+
+	<TextView
+		android:id="@+id/currency_name"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="4dp"
+		android:letterSpacing="-0.01"
+		android:text="US Dollar"
+		android:textColor="@color/colorSecondaryText"
+		android:textSize="@dimen/text_small_body"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="@id/currency_code"
+		app:layout_constraintTop_toBottomOf="@id/currency_code"/>
 
 	<EditText
 		android:id="@+id/currency_amount"
+		style="@style/Text.Medium"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginEnd="16sp"
 		android:digits="0123456789,"
-		android:hint="0"
+		android:gravity="end"
+		android:hint="@string/zero_hint"
 		android:imeOptions="actionDone"
 		android:inputType="numberDecimal"
+		android:letterSpacing="0.02"
 		android:maxLines="1"
-		android:textSize="20sp"
+		android:minWidth="36dp"
+		android:textSize="@dimen/text_title"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
-		tools:text="1183.06"/>
+		tools:ignore="Autofill"
+		tools:text="0"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
