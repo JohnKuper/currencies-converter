@@ -70,7 +70,15 @@ class ConverterActivity : AppCompatActivity(R.layout.activity_main) {
 
     private fun observeNetworkState() {
         connectivityLiveData.observe(this, Observer {
-            if (it) snackbar.dismiss() else snackbar.show()
+            if (it) {
+                snackbar.dismiss()
+                converter_list.updateMargins(bottomMargin = 0)
+            } else {
+                snackbar.show()
+                converter_list.updateMargins(
+                    bottomMargin = resources.getDimensionPixelSize(R.dimen.snackbar_dodge_bottom_margin)
+                )
+            }
         })
     }
 
