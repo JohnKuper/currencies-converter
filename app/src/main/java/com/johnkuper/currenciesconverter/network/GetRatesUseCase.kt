@@ -1,11 +1,11 @@
 package com.johnkuper.currenciesconverter.network
 
+import com.johnkuper.currenciesconverter.BASE_CURRENCY_RATE
+import com.johnkuper.currenciesconverter.RATES_POLLING_DELAY
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
 import io.reactivex.Observable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-
-const val BASE_CURRENCY_RATE = 1.0
 
 class GetRatesUseCase @Inject constructor(
     private val currenciesApi: CurrenciesApi
@@ -16,6 +16,6 @@ class GetRatesUseCase @Inject constructor(
             .getRates(params)
             .map {
                 linkedMapOf(it.baseCurrency to BASE_CURRENCY_RATE).apply { putAll(it.rates) }
-            }.repeatWhen { it.delay(1000, TimeUnit.MILLISECONDS) }
+            }.repeatWhen { it.delay(RATES_POLLING_DELAY, TimeUnit.MILLISECONDS) }
     }
 }

@@ -3,21 +3,22 @@ package com.johnkuper.currenciesconverter.ui
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.johnkuper.currenciesconverter.BASE_CURRENCY_RATE
+import com.johnkuper.currenciesconverter.DEFAULT_AMOUNT
+import com.johnkuper.currenciesconverter.DEFAULT_BASE_CURRENCY
 import com.johnkuper.currenciesconverter.domain.ConverterItem
-import com.johnkuper.currenciesconverter.network.BASE_CURRENCY_RATE
 import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import com.johnkuper.currenciesconverter.network.ResponseResult
 import io.reactivex.disposables.Disposable
+import java.util.*
 import javax.inject.Inject
 
 fun kuperLog(message: String) {
     Log.d("JohnKuper", message)
 }
 
-const val DEFAULT_AMOUNT = 100.0
-const val DEFAULT_BASE_CURRENCY = "EUR"
-
 class ConverterViewModel @Inject constructor(
+    private val currenciesResources: CurrenciesResources,
     private val getRatesUseCase: GetRatesUseCase
 ) : ViewModel() {
 
@@ -27,7 +28,7 @@ class ConverterViewModel @Inject constructor(
     private var baseCurrency: String = DEFAULT_BASE_CURRENCY
     private var converterAmount: Double = DEFAULT_AMOUNT
     private var converterItems = mutableListOf<ConverterItem>()
-    lateinit var lastRates: LinkedHashMap<String, Double>
+    private lateinit var lastRates: LinkedHashMap<String, Double>
 
     private var ratesDisposable: Disposable? = null
 
@@ -48,10 +49,17 @@ class ConverterViewModel @Inject constructor(
 
     private fun toConverterItems(rates: Map<String, Double>): List<ConverterItem> {
         return if (converterItems.isEmpty()) {
-            rates.map { ConverterItem(it.key, it.value * converterAmount) }
+            rates.map {
+                ConverterItem(
+                    it.key,
+                    currenciesResources.getCurrencyName(it.key),
+                    currenciesResources.getFlagUri(it.key),
+                    it.value * converterAmount
+                )
+            }
         } else {
             converterItems.mapNotNull { item ->
-                rates[item.code]?.let { item.copy(amount = it * converterAmount) }
+                rates[item.currencyCode]?.let { item.copy(amount = it * converterAmount) }
             }
         }.also { converterItems = it.toMutableList() }
     }
@@ -78,7 +86,7 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onItemsChanged(items: List<ConverterItem>) {
-        baseCurrency = items.first().code
+        baseCurrency = items.first().currencyCode
         converterAmount = items.first().amount
         converterItems.clear()
         converterItems.addAll(items)

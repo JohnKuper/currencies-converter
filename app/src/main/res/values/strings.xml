@@ -3,4 +3,38 @@
 	<string name="no_network_connection">No network connection</string>
 	<string name="zero_hint">0</string>
 	<string name="rates_title">Rates</string>
+
+	<!-- Currencies names -->
+	<string name="eur_currency_name">Euro</string>
+	<string name="aud_currency_name">Australian dollar</string>
+	<string name="bgn_currency_name">Bulgarian lev</string>
+	<string name="brl_currency_name">Brazilian real</string>
+	<string name="cad_currency_name">Canadian dollar</string>
+	<string name="chf_currency_name">Swiss franc</string>
+	<string name="cny_currency_name">Chinese yuan</string>
+	<string name="czk_currency_name">Czech koruna</string>
+	<string name="dkk_currency_name">Danish krone</string>
+	<string name="gbp_currency_name">British pound</string>
+	<string name="hkd_currency_name">Hong Kong dollar</string>
+	<string name="hrk_currency_name">Croatian kuna</string>
+	<string name="huf_currency_name">Hungarian forint</string>
+	<string name="idr_currency_name">Indonesian rupiah</string>
+	<string name="ils_currency_name">Israeli new shekel</string>
+	<string name="inr_currency_name">Indian rupee</string>
+	<string name="isk_currency_name">Icelandic króna</string>
+	<string name="jpy_currency_name">Japanese yen</string>
+	<string name="krw_currency_name">South Korean won</string>
+	<string name="mxn_currency_name">Mexican peso</string>
+	<string name="myr_currency_name">Malaysian ringgit</string>
+	<string name="nok_currency_name">Norwegian krone</string>
+	<string name="nzd_currency_name">New Zealand dollar</string>
+	<string name="php_currency_name">Philippine peso</string>
+	<string name="pln_currency_name">Polish złoty</string>
+	<string name="ron_currency_name">Romanian leu</string>
+	<string name="rub_currency_name">Russian ruble</string>
+	<string name="sek_currency_name">Swedish krona</string>
+	<string name="sgd_currency_name">Singapore dollar</string>
+	<string name="thb_currency_name">Thai baht</string>
+	<string name="usd_currency_name">US dollar</string>
+	<string name="zar_currency_name">South African rand</string>
 </resources>

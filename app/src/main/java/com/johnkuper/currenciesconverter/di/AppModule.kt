@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import com.johnkuper.currenciesconverter.network.ConnectivityLiveData
+import com.johnkuper.currenciesconverter.ui.CurrenciesResources
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -25,4 +26,8 @@ class AppModule {
     @Provides
     @Singleton
     fun providesConnectivityLiveData(cm: ConnectivityManager) = ConnectivityLiveData(cm)
+
+    @Provides
+    @Singleton
+    fun provideCurrenciesResources(context: Context) = CurrenciesResources(context)
 }

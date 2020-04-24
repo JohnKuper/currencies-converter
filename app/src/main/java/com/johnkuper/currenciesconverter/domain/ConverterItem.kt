@@ -1,10 +1,13 @@
 package com.johnkuper.currenciesconverter.domain
 
+import android.net.Uri
 import com.johnkuper.currenciesconverter.utils.decimalFormat
 import com.johnkuper.currenciesconverter.utils.round
 
 data class ConverterItem(
-    val code: String,
+    val currencyCode: String,
+    val currencyName: String,
+    val flagUri: Uri,
     val amount: Double
 ) {
 

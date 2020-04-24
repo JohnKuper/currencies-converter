@@ -118,7 +118,7 @@ class ConverterAdapter(
     override fun getItemCount() = items.size
 
     override fun getItemId(position: Int): Long {
-        return items[position].code.hashCode().toLong()
+        return items[position].currencyCode.hashCode().toLong()
     }
 
     private fun moveItemOnTop(fromPosition: Int) {
@@ -143,7 +143,7 @@ class ConverterAdapter(
     //TODO Kuper refactor currencyAmount setup
     inner class ConverterViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val currency_flag = view.currency_flag
+        private val currencyFlag = view.currency_flag
         private val currencyCode = view.currency_code
         private val currencyName = view.currency_name
         private val currencyAmount = view.currency_amount
@@ -197,10 +197,11 @@ class ConverterAdapter(
         fun bind(item: ConverterItem) {
 //            kuperLog("bind(), position = $position")
             if (!currencyAmount.isFocused) {
-                currencyCode.text = item.code
+                currencyCode.text = item.currencyCode
+                currencyName.text = item.currencyName
                 currencyAmount.setText(item.formattedAmount)
+                Glide.with(currencyFlag).load(item.flagUri).circleCrop().into(currencyFlag)
             }
-            Glide.with(currency_flag).load(R.drawable.flag_us).circleCrop().into(currency_flag)
         }
     }
 }
