@@ -12,10 +12,14 @@ fun Double.round(places: Int): Double {
 }
 
 @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-fun parseDouble(text: CharSequence): Double {
-    return try {
-        decimalFormat.parse(text.toString()).toDouble()
-    } catch (e: Exception) {
+fun parseDouble(text: CharSequence?): Double {
+    return if (text.isNullOrEmpty()) {
         0.0
+    } else {
+        try {
+            decimalFormat.parse(text.toString()).toDouble()
+        } catch (e: Exception) {
+            0.0
+        }
     }
 }

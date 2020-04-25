@@ -11,4 +11,5 @@ import kotlin.reflect.KClass
 )
 @Retention(AnnotationRetention.RUNTIME)
 @MapKey
+@Suppress("unused")
 annotation class ViewModelKey(val key: KClass<out ViewModel>)

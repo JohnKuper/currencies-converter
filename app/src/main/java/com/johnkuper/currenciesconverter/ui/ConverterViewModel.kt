@@ -1,21 +1,15 @@
 package com.johnkuper.currenciesconverter.ui
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.johnkuper.currenciesconverter.BASE_CURRENCY_RATE
 import com.johnkuper.currenciesconverter.DEFAULT_AMOUNT
 import com.johnkuper.currenciesconverter.DEFAULT_BASE_CURRENCY
-import com.johnkuper.currenciesconverter.domain.ConverterItem
 import com.johnkuper.currenciesconverter.network.GetRatesUseCase
 import com.johnkuper.currenciesconverter.network.ResponseResult
 import io.reactivex.disposables.Disposable
 import java.util.*
 import javax.inject.Inject
-
-fun kuperLog(message: String) {
-    Log.d("JohnKuper", message)
-}
 
 class ConverterViewModel @Inject constructor(
     private val currenciesResources: CurrenciesResources,
@@ -74,13 +68,11 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun startRatesPolling() {
-        kuperLog("startRatesPolling()")
         ratesDisposable?.dispose()
         ratesDisposable = getRatesUseCase(baseCurrency, _currenciesRates)
     }
 
     fun stopRatesPolling() {
-        kuperLog("stopRatesPolling()")
         ratesDisposable?.dispose()
         ratesDisposable = null
     }
@@ -95,7 +87,6 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onAmountChanged(amount: Double) {
-        kuperLog("ConverterViewModel.onAmountChanged(), amount=$amount")
         converterAmount = amount
         converterItemsLiveData.value = toConverterItems(lastRates)
     }

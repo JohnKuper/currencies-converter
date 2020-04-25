@@ -3,7 +3,7 @@ package com.johnkuper.currenciesconverter
 import com.google.gson.Gson
 import com.johnkuper.currenciesconverter.api.CurrenciesApi
 import com.johnkuper.currenciesconverter.api.CurrenciesRatesResponse
-import com.johnkuper.currenciesconverter.domain.ConverterItem
+import com.johnkuper.currenciesconverter.ui.ConverterItem
 import com.johnkuper.currenciesconverter.ui.ConverterViewModel
 import com.johnkuper.currenciesconverter.ui.CurrenciesResources
 import com.johnkuper.currenciesconverter.utils.fromJson
@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @RunWith(RobolectricTestRunner::class)
 @Config(
-    sdk = [23],
+    sdk = [24],
     application = TestConverterApplication::class
 )
 class ConverterViewModelTest {

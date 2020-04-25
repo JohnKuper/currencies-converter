@@ -1,4 +1,4 @@
-package com.johnkuper.currenciesconverter.domain
+package com.johnkuper.currenciesconverter.ui
 
 import android.net.Uri
 import com.johnkuper.currenciesconverter.utils.decimalFormat
