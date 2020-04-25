@@ -1,4 +1,4 @@
-package com.johnkuper.currenciesconverter
+package com.johnkuper.currenciesconverter.utils
 
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers

@@ -6,6 +6,7 @@ import com.johnkuper.currenciesconverter.api.CurrenciesRatesResponse
 import com.johnkuper.currenciesconverter.ui.ConverterItem
 import com.johnkuper.currenciesconverter.ui.ConverterViewModel
 import com.johnkuper.currenciesconverter.ui.CurrenciesResources
+import com.johnkuper.currenciesconverter.utils.TrampolineSchedulerRule
 import com.johnkuper.currenciesconverter.utils.fromJson
 import com.johnkuper.currenciesconverter.utils.readTextResource
 import com.jraska.livedata.TestObserver
@@ -46,6 +47,8 @@ class ConverterViewModelTest {
 
     private val eurResponse by lazy { getRatesResponse("eur_rates_response.json") }
     private val audResponse by lazy { getRatesResponse("aud_rates_response.json") }
+    private val audZeroCadResponse by lazy { getRatesResponse("aud_rates_zero_cad_response.json") }
+    private val cadResponse by lazy { getRatesResponse("cad_rates_response.json") }
 
     @Before
     fun setUp() {
@@ -127,5 +130,20 @@ class ConverterViewModelTest {
             eurRates.map { getConverterItem(it.key, it.value, amounts[3]) },
             eurRates.map { getConverterItem(it.key, it.value, amounts[4]) }
         )
+    }
+
+    @Test
+    fun changing_to_zero_rate_leads_to_zero_amounts() {
+        mockRatesResponse(DEFAULT_BASE_CURRENCY, audZeroCadResponse)
+        converterViewModel.startRatesPolling()
+
+        val cadMovedOnTopItems = itemsObserver.value().toMutableList().apply { add(0, removeAt(3)) }
+        mockRatesResponse(cadMovedOnTopItems[0].currencyCode, cadResponse)
+        converterViewModel.onItemsChanged(cadMovedOnTopItems)
+
+        val audZeroCadExpectedItems = audZeroCadResponse.toConverterItems(DEFAULT_AMOUNT)
+        val zeroAmountItems = cadMovedOnTopItems.map { it.copy(amount = 0.0) }
+        itemsObserver.assertValueHistory(audZeroCadExpectedItems, zeroAmountItems, zeroAmountItems)
+        itemsObserver.assertHistorySize(3)
     }
 }
