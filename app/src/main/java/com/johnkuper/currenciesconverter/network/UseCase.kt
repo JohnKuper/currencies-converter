@@ -5,6 +5,9 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
+/**
+ * Base class for all use cases which delegates Rx callbacks to LiveData and wraps them in [ResponseResult]
+ */
 abstract class UseCase<in P, R> {
 
     operator fun invoke(parameters: P, resultLiveData: MutableLiveData<ResponseResult<R>>): Disposable {

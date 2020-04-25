@@ -9,6 +9,11 @@ import javax.inject.Inject
 
 private const val ON_NETWORK_LOST_DELAY = 500L
 
+/**
+ * Notifies subscribers about network connectivity status.
+ * Emits false if both WIFI and CELLULAR are unavailable.
+ * Emits true if WIFI or CELLULAR become available but both were unavailable before.
+ */
 class ConnectivityLiveData @Inject constructor(
     private val connectivityManager: ConnectivityManager
 ) : LiveData<Boolean>() {

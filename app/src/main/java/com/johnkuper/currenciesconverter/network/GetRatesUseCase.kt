@@ -7,6 +7,10 @@ import io.reactivex.Observable
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+/**
+ * Receives currency rates every [RATES_POLLING_DELAY] and returns rates as LinkedHashMap having
+ * base currency with the [BASE_CURRENCY_RATE] as a first value.
+ */
 class GetRatesUseCase @Inject constructor(
     private val currenciesApi: CurrenciesApi
 ) : UseCase<String, LinkedHashMap<String, Double>>() {

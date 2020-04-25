@@ -41,6 +41,10 @@ class ConverterViewModel @Inject constructor(
         _currenciesRates.removeObserver(currenciesRatesObserver)
     }
 
+    /**
+     * Transforms currencies rates to converter list items.
+     * If converter list items are not empty than updates them keeping order.
+     */
     private fun toConverterItems(rates: Map<String, Double>): List<ConverterItem> {
         return if (converterItems.isEmpty()) {
             rates.map {
@@ -58,7 +62,11 @@ class ConverterViewModel @Inject constructor(
         }.also { converterItems = it.toMutableList() }
     }
 
-    private fun getRecalculatedRates(): LinkedHashMap<String, Double> {
+    /**
+     * Calculates rates for [baseCurrency] using the latest known currency ratios.
+     * It helps to receive new rates after changing the base currency immediately without waiting for server response.
+     */
+    private fun getRecalculatedRates(baseCurrency: String): LinkedHashMap<String, Double> {
         val baseCurrencyOldRate = requireNotNull(lastRates.remove(baseCurrency))
         return linkedMapOf(baseCurrency to BASE_CURRENCY_RATE).apply {
             putAll(lastRates.mapValues { (_, rate) ->
@@ -82,7 +90,7 @@ class ConverterViewModel @Inject constructor(
         converterAmount = items.first().amount
         converterItems.clear()
         converterItems.addAll(items)
-        _currenciesRates.value = ResponseResult.Success(getRecalculatedRates())
+        _currenciesRates.value = ResponseResult.Success(getRecalculatedRates(baseCurrency))
         startRatesPolling()
     }
 
