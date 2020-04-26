@@ -16,7 +16,7 @@ class ConverterViewModel @Inject constructor(
     private val getRatesUseCase: GetRatesUseCase
 ) : ViewModel() {
 
-    private val _currenciesRates = MutableLiveData<ResponseResult<LinkedHashMap<String, Double>>>()
+    private val currenciesRates = MutableLiveData<ResponseResult<LinkedHashMap<String, Double>>>()
     val converterItemsLiveData = MutableLiveData<List<ConverterItem>>()
 
     private var baseCurrency: String = DEFAULT_BASE_CURRENCY
@@ -34,11 +34,11 @@ class ConverterViewModel @Inject constructor(
     }
 
     init {
-        _currenciesRates.observeForever(currenciesRatesObserver)
+        currenciesRates.observeForever(currenciesRatesObserver)
     }
 
     override fun onCleared() {
-        _currenciesRates.removeObserver(currenciesRatesObserver)
+        currenciesRates.removeObserver(currenciesRatesObserver)
     }
 
     /**
@@ -77,7 +77,7 @@ class ConverterViewModel @Inject constructor(
 
     fun startRatesPolling() {
         ratesDisposable?.dispose()
-        ratesDisposable = getRatesUseCase(baseCurrency, _currenciesRates)
+        ratesDisposable = getRatesUseCase(baseCurrency, currenciesRates)
     }
 
     fun stopRatesPolling() {
@@ -90,7 +90,7 @@ class ConverterViewModel @Inject constructor(
         converterAmount = items.first().amount
         converterItems.clear()
         converterItems.addAll(items)
-        _currenciesRates.value = ResponseResult.Success(getRecalculatedRates(baseCurrency))
+        currenciesRates.value = ResponseResult.Success(getRecalculatedRates(baseCurrency))
         startRatesPolling()
     }
 
